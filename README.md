@@ -4,3 +4,5 @@ Instructions:
 
 
 go build -o printblockhash
+
+Then, do: printblockhash -f <filename>
