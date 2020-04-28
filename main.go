@@ -19,6 +19,52 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+type BlockMetadataIndex int32
+
+const (
+	BlockMetadataIndex_SIGNATURES          BlockMetadataIndex = 0
+	BlockMetadataIndex_LAST_CONFIG         BlockMetadataIndex = 1
+	BlockMetadataIndex_TRANSACTIONS_FILTER BlockMetadataIndex = 2
+	BlockMetadataIndex_ORDERER             BlockMetadataIndex = 3
+)
+
+type TxValidationFlags []uint8
+
+var TxValidationCode_name = map[int32]string{
+	0:   "VALID",
+	1:   "NIL_ENVELOPE",
+	2:   "BAD_PAYLOAD",
+	3:   "BAD_COMMON_HEADER",
+	4:   "BAD_CREATOR_SIGNATURE",
+	5:   "INVALID_ENDORSER_TRANSACTION",
+	6:   "INVALID_CONFIG_TRANSACTION",
+	7:   "UNSUPPORTED_TX_PAYLOAD",
+	8:   "BAD_PROPOSAL_TXID",
+	9:   "DUPLICATE_TXID",
+	10:  "ENDORSEMENT_POLICY_FAILURE",
+	11:  "MVCC_READ_CONFLICT",
+	12:  "PHANTOM_READ_CONFLICT",
+	13:  "UNKNOWN_TX_TYPE",
+	14:  "TARGET_CHAIN_NOT_FOUND",
+	15:  "MARSHAL_TX_ERROR",
+	16:  "NIL_TXACTION",
+	17:  "EXPIRED_CHAINCODE",
+	18:  "CHAINCODE_VERSION_CONFLICT",
+	19:  "BAD_HEADER_EXTENSION",
+	20:  "BAD_CHANNEL_HEADER",
+	21:  "BAD_RESPONSE_PAYLOAD",
+	22:  "BAD_RWSET",
+	23:  "ILLEGAL_WRITESET",
+	24:  "INVALID_WRITESET",
+	25:  "INVALID_CHAINCODE",
+	254: "NOT_VALIDATED",
+	255: "INVALID_OTHER_REASON",
+}
+
+func (obj TxValidationFlags) Flag(txIndex int) string {
+	return TxValidationCode_name[int32(obj[txIndex])]
+}
+
 var (
 	f = kingpin.Flag("filename", "filename").Short('f').ExistingFile()
 )
@@ -46,6 +92,13 @@ func main() {
 
 	fmt.Println("Current hash:", currHash)
 	fmt.Println("Previous hash:", prevHash)
+	txFilter := TxValidationFlags(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER])
+	for i := 0; i < len(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER]); i++ {
+		fmt.Println("Transaction", i, "status:", txFilter.Flag(i))
+	}
+	if len(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER]) == 0 {
+		fmt.Println("TRANSACTIONS_FILTER section is empty")
+	}
 }
 
 type asn1Header struct {
