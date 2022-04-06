@@ -15,7 +15,7 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/hyperledger/fabric/protos/common"
+	"github.com/hyperledger/fabric-protos-go/common"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -94,10 +94,21 @@ func main() {
 	fmt.Println("Previous hash:", prevHash)
 	txFilter := TxValidationFlags(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER])
 	for i := 0; i < len(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER]); i++ {
-		fmt.Println("Transaction", i, "status:", txFilter.Flag(i))
+		fmt.Println("Transaction", i, "status:", txFilter.Flag(i), "size:", len(block.Data.Data[i]))
 	}
 	if len(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER]) == 0 {
 		fmt.Println("TRANSACTIONS_FILTER section is empty")
+	}
+	signatureMD := block.Metadata.Metadata[BlockMetadataIndex_SIGNATURES]
+	if len(signatureMD) == 0 {
+		fmt.Println("No signatures in block")
+	} else {
+		md := &common.Metadata{}
+		if err := proto.Unmarshal(signatureMD, md); err !=nil {
+			fmt.Println("Signature metadata is malformed:", err)
+		} else {
+			fmt.Println("Blocked contains", len(md.Signatures), "signatures")
+		}
 	}
 }
 
