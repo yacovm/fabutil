@@ -89,7 +89,7 @@ func main() {
 
 	currHash := hex.EncodeToString(BlockHeaderHash(block.Header))
 	prevHash := hex.EncodeToString(block.Header.PreviousHash)
-
+	fmt.Println("Block number", block.Header.Number)
 	fmt.Println("Current hash:", currHash)
 	fmt.Println("Previous hash:", prevHash)
 	txFilter := TxValidationFlags(block.Metadata.Metadata[BlockMetadataIndex_TRANSACTIONS_FILTER])
